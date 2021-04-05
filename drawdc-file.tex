@@ -1,0 +1,146 @@
+%
+% DRAWDC: file
+% This file is loaded by ../drawdc.sty
+%
+
+\RequirePackage{tikz}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Variables
+%
+
+\newlength{\dd@filestruct@recordwidth}
+\newlength{\dd@filestruct@recordheight}
+\newlength{\dd@filestruct@nodedistance}
+\def\dd@filestruct@linecolor{.}
+
+\newcommand{\dd@filestruct@defaults}{
+	\setlength{\dd@filestruct@recordwidth}{2cm}
+	\setlength{\dd@filestruct@recordheight}{0.5cm}
+	\setlength{\dd@filestruct@nodedistance}{0.05cm}
+	\def\dd@filestruct@recordsperblock{5}
+	\def\dd@filestruct@blockfont{\rmfamily\itshape}
+	\def\dd@filestruct@recordfont{\ttfamily}
+}
+\dd@filestruct@defaults
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+%
+\pgfkeys{
+	/drawdc/file struct/.cd,
+	% ** list properties
+	start at/.store in = \dd@filestruct@startat,
+	name/.store in = \dd@filestruct@filename,
+	%
+	record width/.code = {\setlength{\dd@filestruct@recordwidth}{#1}},
+	record font/.store in = \dd@filestruct@recordfont,
+	records per block/.store in = \dd@filestruct@recordsperblock,
+	%
+	start at/.store in = \dd@filestruct@currentxy,	
+	%
+	options/.code = {\def\dd@filestruct@options{/tikz/.cd, #1}},
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Drawing stuff
+%
+\usetikzlibrary{calc, chains, scopes, math}
+\tikzset{
+	every record/.style = {
+		draw = \dd@filestruct@linecolor,
+		inner sep = 2pt,
+		outer sep = 0pt,
+		text width = \dimexpr \dd@filestruct@recordwidth - 4pt \relax,
+		minimum height = \dd@filestruct@recordheight,
+		text depth = 0.05\dd@filestruct@recordheight,
+		font = \dd@filestruct@recordfont,
+		align = left,
+	},
+}
+
+%\newcommand{\ddfsdrawrecords}[1]{%
+%	\foreach \rec in {1, ..., #1}{
+%		\node {};
+%	}%
+%}
+
+
+%\newcommand{\ddfsblock}[1]{
+%	\begin{scope}[
+%		start chain = A going below,
+%		node distance = \dd@filestruct@nodedistance,
+%		nodes = {every record, on chain = A}, 
+%	]
+%		\ddfsdrawrecords{5}
+%		\coordinate (block nw)  at ($(current bounding box.north west)
+%			+ (-\dd@filestruct@nodedistance, 2\dd@filestruct@nodedistance)$);
+%		\coordinate (block se) at ($(current bounding box.south east)
+%			+ (\dd@filestruct@nodedistance, 0)$);
+%		\draw (block nw) rectangle (block se);
+%	\end{scope}
+%	\node[anchor = south west, xshift = 2\dd@filestruct@nodedistance,
+%		font = \itshape]
+%		at (block se) {bloco 0};
+%}
+
+\newcounter{blockcounter}
+\newcounter{recordcounter}
+\newif\ifdd@filestruct@isfirst
+\newcommand{\ddfsfile}[2][]{
+	\def\dd@filestruct@filename{file}%
+	\pgfkeys{
+		/drawdc/file struct/.cd,
+		#1,
+	}
+	{
+		\ddtikzset{%
+			start chain = \dd@filestruct@filename{} going below,
+			node distance = \dd@filestruct@nodedistance,
+		}
+		\setcounter{blockcounter}{0}
+		\edef\blocklist{#2}
+		\def\@yshift{0pt}
+		\foreach \bl in \blocklist{
+			\global\dd@filestruct@isfirsttrue
+			\setcounter{recordcounter}{0}
+			\edef\recordlist{\bl}
+			\foreach \rec in \recordlist {
+				\ifdd@filestruct@isfirst
+					\node[yshift = \@yshift,
+						on chain, every record]
+						(\dd@filestruct@filename-\theblockcounter-\therecordcounter) {\rec};
+					\global\dd@filestruct@isfirstfalse
+				\else
+					\node [on chain, every record] (\dd@filestruct@filename-\theblockcounter-\therecordcounter) {\rec};%
+				\fi
+				\stepcounter{recordcounter}
+			}
+			\pgfmathsetmacro\@lastrecord{%
+				int(\dd@filestruct@recordsperblock - 1)}
+			\foreach \rec in {\therecordcounter, ..., \@lastrecord}{
+				\node [on chain, every record] 
+					(\dd@filestruct@filename-\theblockcounter-\rec) {};
+			}
+			\draw
+				($(\dd@filestruct@filename-\theblockcounter-0.north west) +
+				  (-2\dd@filestruct@nodedistance, \dd@filestruct@nodedistance)$) 
+				-|
+				($(\dd@filestruct@filename-\theblockcounter-\@lastrecord.south east) +
+				  (2\dd@filestruct@nodedistance, -\dd@filestruct@nodedistance)$) -| cycle;
+			\node [font = \dd@filestruct@blockfont, anchor = west] at
+			 ($(\dd@filestruct@filename-\theblockcounter-\@lastrecord.south east) +
+			 (3\dd@filestruct@nodedistance, 2\dd@filestruct@nodedistance)$)
+			 {bloco \theblockcounter\strut};
+			\stepcounter{blockcounter}
+			\global\def\@yshift{-\dd@filestruct@nodedistance}
+		}
+	}
+}
+
+
+\newcommand{\ddfsset}[1]{
+	\pgfkeys{/drawdc/file struct/.cd, #1}
+}
+
+%% EOF
