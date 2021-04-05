@@ -1,6 +1,6 @@
 # drawdc
 
-Ferramentas para desenho de estruturas de dados em \LaTeX.
+Ferramentas para desenho de estruturas de dados em $$\LaTeX$$.
 
 Ferramentas
 
