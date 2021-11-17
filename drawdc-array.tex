@@ -223,7 +223,8 @@
 		cell label = #2,
 	}
 	\foreach \v[count = \idx from 0] in {#3}
-		\node[font = \drawdc@array@cellfont] at (\drawdc@array@celllabel\idx) {\v\strut};
+		\node[font = \drawdc@array@cellfont,
+			text depth = 0.55ex] at (\drawdc@array@celllabel\idx) {\v\strut};
 }}
 
 \newcommand{\ddfillcells}[3][]{{
@@ -233,7 +234,8 @@
 		cell label = #2,
 	}
 	\foreach \idx/\v in {#3}
-		\node[font = \drawdc@array@cellfont] at (\drawdc@array@celllabel\idx) {\v\strut};
+		\node[font = \drawdc@array@cellfont,
+			text depth = 0.55ex] at (\drawdc@array@celllabel\idx) {\v\strut};
 }}
 
 \newcommand{\ddarrayset}[1]{
