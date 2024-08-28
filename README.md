@@ -1,3 +1,7 @@
+**This project is obsolete**
+
+Please see http://github.com/jandermoreira/dsdraw.
+
 # drawdc
 
 Ferramentas para desenho de estruturas de dados para LaTeX.
